@@ -1,0 +1,19 @@
+model_list:
+  # Local LLM via Ollama (OpenAI-compatible endpoint exposed by LiteLLM)
+  - model_name: local-ollama
+    litellm_params:
+      model: ollama/qwen2.5-coder:7b
+      api_base: http://ollama:11434
+
+# You can add remote providers here (keys via env vars)
+# - model_name: gpt-4o-mini
+#   litellm_params:
+#     model: openai/gpt-4o-mini
+# - model_name: claude-3-5-sonnet
+#   litellm_params:
+#     model: anthropic/claude-3-5-sonnet-latest
+
+general_settings:
+  # Fail closed if remote keys are missing; keep local usable.
+  # (LiteLLM will simply error for remote models without keys.)
+  master_key: null

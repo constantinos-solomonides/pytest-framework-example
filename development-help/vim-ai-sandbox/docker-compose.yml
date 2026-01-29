@@ -1,0 +1,82 @@
+services:
+  vim:
+    build:
+      context: ./vim
+      args:
+        LOCAL_UID: ${LOCAL_UID:-1000}
+        LOCAL_GID: ${LOCAL_GID:-1000}
+        LOCAL_USER: ${LOCAL_USER:-dev}
+    image: vim-ai-sandbox:latest
+    container_name: vim-sandbox
+    hostname: vim-sandbox
+    stdin_open: true
+    tty: true
+    environment:
+      # AI endpoint selection
+      AI_PROVIDER: ${AI_PROVIDER:-ollama}          # ollama | openai_compat
+      AI_MODEL: ${AI_MODEL:-qwen2.5-coder:7b}     # for ollama: model name; for openai_compat: model id
+      AI_BASE_URL: ${AI_BASE_URL:-http://ollama:11434}
+      OPENAI_COMPAT_BASE_URL: ${OPENAI_COMPAT_BASE_URL:-http://litellm:4000}
+      OPENAI_COMPAT_API_KEY: ${OPENAI_COMPAT_API_KEY:-}
+      # Safety: workspace is isolated; mount only persist/ dirs (bind mounts, not Docker volumes)
+      WORKSPACE_DIR: /workspace
+    volumes:
+      # Persist user home (vim config, plugins, history, ssh keys if you add them, etc.)
+      - ./persist/home:/home/${LOCAL_USER}
+      # Persist workspace content (you can copy code in/out explicitly)
+      - ./persist/workspace:/workspace
+    depends_on:
+      - ollama
+      - litellm
+    networks: [sandboxnet]
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+    restart: unless-stopped
+    environment:
+      OLLAMA_HOST: 0.0.0.0:11434
+    volumes:
+      - ./persist/ollama:/root/.ollama
+    ports:
+      - "11434:11434"
+    networks: [sandboxnet]
+
+  # Optional: OpenAI-compatible proxy to route requests to Ollama and/or real remote providers
+  # This lets you keep Vim scripts stable (OpenAI-like /v1/chat/completions) and swap providers via env vars.
+  litellm:
+    image: ghcr.io/berriai/litellm:latest
+    container_name: litellm
+    restart: unless-stopped
+    command: ["--config", "/config/config.yaml", "--port", "4000", "--host", "0.0.0.0"]
+    environment:
+      # Optional: set keys in .env (not committed) and Litellm can forward to remote models.
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+    volumes:
+      - ./litellm/config.yaml:/config/config.yaml:ro
+    ports:
+      - "4000:4000"
+    depends_on:
+      - ollama
+    networks: [sandboxnet]
+
+  # Optional UI for chatting with your local model
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:main
+    container_name: open-webui
+    restart: unless-stopped
+    environment:
+      OLLAMA_BASE_URL: http://ollama:11434
+      WEBUI_AUTH: "False"
+    volumes:
+      - ./persist/open-webui:/app/backend/data
+    ports:
+      - "3000:8080"
+    depends_on:
+      - ollama
+    networks: [sandboxnet]
+
+networks:
+  sandboxnet:
+    driver: bridge

@@ -1,0 +1,127 @@
+" Minimal Vim config for AI-assisted workflows inside the sandbox.
+" Leader key requirement
+let mapleader="\"
+
+set nocompatible
+filetype plugin indent on
+syntax on
+set number relativenumber
+set hidden
+set nowrap
+set undofile
+set updatetime=300
+set clipboard=unnamedplus
+set wildmenu
+set incsearch hlsearch
+set ignorecase smartcase
+
+" Plug (vim-plug) - installed in image at /usr/local/share/vim/site/autoload/plug.vim
+if empty(glob('~/.vim/autoload/plug.vim'))
+  silent !mkdir -p ~/.vim/autoload
+  silent !cp /usr/local/share/vim/site/autoload/plug.vim ~/.vim/autoload/plug.vim
+endif
+
+call plug#begin('~/.vim/plugged')
+" Optional quality-of-life plugins (safe defaults)
+Plug 'tpope/vim-sensible'
+Plug 'tpope/vim-surround'
+Plug 'preservim/nerdtree'
+call plug#end()
+
+" Install plugins on first launch (non-blocking best-effort)
+autocmd VimEnter * if empty(glob('~/.vim/plugged/vim-sensible')) | silent! PlugInstall --sync | endif
+
+" ------------------------
+" AI Commands
+" ------------------------
+" AIAsk: prompt for a question; send current visual selection if present; otherwise current line.
+command! -nargs=* AIAsk call s:AIAsk(<q-args>)
+command! -range -nargs=* AIRewrite <line1>,<line2>call s:AIRewrite(<q-args>)
+command! -range -nargs=0 AIExplain <line1>,<line2>call s:AIExplain()
+
+function! s:GetRangeText(line1, line2) abort
+  return join(getline(a:line1, a:line2), "\n")
+endfunction
+
+function! s:SystemAI(cmd, input) abort
+  " Use systemlist to avoid extra shell quoting issues; join later.
+  let l:out = systemlist(a:cmd, a:input)
+  if v:shell_error != 0
+    echohl ErrorMsg | echom "AI command failed (" . v:shell_error . "): " . a:cmd | echohl None
+    return []
+  endif
+  return l:out
+endfunction
+
+function! s:AIAsk(args) abort
+  let l:q = a:args
+  if l:q ==# ''
+    let l:q = input('AI ask: ')
+  endif
+  if l:q ==# ''
+    return
+  endif
+
+  " Try to use visual selection if it exists (best effort).
+  let l:sel = ''
+  if mode() ==# 'v' || mode() ==# 'V'
+    normal! `<
+    let l:sel = s:GetRangeText(line("'<"), line("'>"))
+  endif
+
+  let l:payload = l:q
+  if l:sel !=# ''
+    let l:payload = l:q . "\n\nContext:\n" . l:sel
+  endif
+
+  let l:out = s:SystemAI('/usr/local/bin/ai_chat.sh', l:payload)
+  if empty(l:out)
+    return
+  endif
+
+  " Open a scratch buffer with the response.
+  new
+  setlocal buftype=nofile bufhidden=wipe noswapfile
+  call setline(1, l:out)
+  normal! gg
+endfunction
+
+function! s:AIRewrite(args) range abort
+  let l:instr = a:args
+  let l:input = s:GetRangeText(a:firstline, a:lastline)
+  let l:cmd = '/usr/local/bin/ai_rewrite.sh'
+  if l:instr !=# ''
+    let l:cmd = l:cmd . ' ' . shellescape(l:instr)
+  endif
+  let l:out = s:SystemAI(l:cmd, l:input)
+  if empty(l:out)
+    return
+  endif
+  call setline(a:firstline, l:out)
+  if (a:lastline > a:firstline + len(l:out) - 1)
+    execute (a:firstline + len(l:out)) . ',' . a:lastline . 'delete _'
+  endif
+endfunction
+
+function! s:AIExplain() range abort
+  let l:input = s:GetRangeText(a:firstline, a:lastline)
+  let l:out = s:SystemAI('/usr/local/bin/ai_explain.sh', l:input)
+  if empty(l:out)
+    return
+  endif
+  new
+  setlocal buftype=nofile bufhidden=wipe noswapfile
+  call setline(1, l:out)
+  normal! gg
+endfunction
+
+" Keybindings (leader is backslash)
+nnoremap <leader>n :NERDTreeToggle<CR>
+vnoremap <leader>ar :AIRewrite<CR>
+nnoremap <leader>aa :AIAsk<CR>
+vnoremap <leader>aa :AIAsk<CR>
+vnoremap <leader>ae :AIExplain<CR>
+nnoremap <leader>ae :AIExplain<CR>
+
+" Help
+nnoremap <leader>ah :tabnew /usr/local/share/vim-ai-help/HELP.md<CR>
