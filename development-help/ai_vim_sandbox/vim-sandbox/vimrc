@@ -1,0 +1,45 @@
+\
+" --- Basic UX ---
+set nocompatible
+filetype plugin indent on
+syntax on
+set number
+set hidden
+set updatetime=300
+set clipboard=unnamedplus
+set mouse=a
+
+" Leader
+let mapleader="\\"
+
+" --- Plugins ---
+call plug#begin('~/.vim/plugged')
+
+" Local LLM integration via Ollama (Vim plugin)
+" Repo: https://github.com/gergap/vim-ollama
+Plug 'gergap/vim-ollama'
+
+" Quality of life
+Plug 'tpope/vim-surround'
+Plug 'tpope/vim-commentary'
+Plug 'junegunn/fzf', { 'do': { -> fzf#install() } }
+Plug 'junegunn/fzf.vim'
+
+call plug#end()
+
+" --- vim-ollama settings ---
+" The plugin expects Ollama API reachable at http://ollama:11434 by default in this compose setup.
+" If you change compose service name or port, update this.
+let g:ollama_host = get(environ(), 'OLLAMA_BASE_URL', 'http://ollama:11434')
+
+" Keymaps (adjust to your taste)
+" Completion / suggestions (depends on plugin features)
+nnoremap <leader>oc :OllamaComplete<CR>
+vnoremap <leader>or :OllamaRewrite<CR>
+
+" FZF shortcuts
+nnoremap <leader>ff :Files<CR>
+nnoremap <leader>fg :Rg<CR>
+
+" --- Notes ---
+" If you want to prevent accidental data exfiltration, keep mounts limited to ./persist/workspace.
