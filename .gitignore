@@ -1,1 +1,4 @@
 .*.swp
+development-help/ai_vim_sandbox/persist/*
+!development-help/ai_vim_sandbox/persist/vimrc
+development-help/ai_vim_sandbox/.env
