@@ -43,7 +43,7 @@ This approach avoids mounting your entire host home directory into containers.
 
 ## Vim AI usage
 
-This environment installs the **vim-ollama** plugin. citeturn0search0
+This environment installs the **vim-ollama** plugin.
 
 Configured in `vim-sandbox/vimrc`:
 - Leader key: `\`
@@ -52,7 +52,7 @@ Configured in `vim-sandbox/vimrc`:
 
 If you change the compose service name or port, update `g:ollama_host`.
 
-Ollama API base URL defaults to `http://ollama:11434/api` and the chat endpoint is `POST /api/chat`. citeturn0search2turn0search8
+Ollama API base URL defaults to `http://ollama:11434/api` and the chat endpoint is `POST /api/chat`.
 
 ## Agentic iteration inside the container
 
@@ -85,5 +85,5 @@ Notes:
 
 ## References
 
-- Ollama API docs: base URL and `/api/chat`. citeturn0search2turn0search8
-- vim-ollama plugin repository. citeturn0search0
+- Ollama API docs: base URL and `/api/chat`.
+- vim-ollama plugin repository.
