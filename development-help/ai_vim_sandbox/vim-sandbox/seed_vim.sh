@@ -7,6 +7,7 @@ AUTOLOAD_DIR="${VIM_DIR}/autoload"
 PLUG_FILE="${AUTOLOAD_DIR}/plug.vim"
 
 # Prefer local vimrc if present; fall back to system-local
+VIMRC_TEMPLATE="/etc/vimrc.template"
 USER_VIMRC="${HOME}/.vimrc"
 SYSTEM_VIMRC="/etc/vim/vimrc.local"
 
@@ -34,8 +35,12 @@ chmod 0644 "${PLUG_FILE}"
 # --- Choose target vimrc to edit ---
 TARGET_VIMRC="${USER_VIMRC}"
 if [ ! -f "${TARGET_VIMRC}" ]; then
-  # If user vimrc doesn't exist, seed into system-local one.
-  TARGET_VIMRC="${SYSTEM_VIMRC}"
+  if [ -e "${VIMRC_TEMPLATE}" ]; then
+    cp "${VIMRC_TEMPLATE}" "${TARGET_VIMRC}"
+  else
+    # If user vimrc doesn't exist, seed into system-local one.
+    TARGET_VIMRC="${SYSTEM_VIMRC}"
+  fi
 fi
 
 # --- Ensure vimrc contains required plug bootstrap/config ---

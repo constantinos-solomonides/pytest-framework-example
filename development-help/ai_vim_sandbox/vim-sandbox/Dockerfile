@@ -40,6 +40,7 @@ RUN mkdir -p /home/${USERNAME}/.vim/autoload \
 
 
 COPY entrypoint.sh /entrypoint.sh
+COPY vimrc /etc/vimrc.template
 RUN chmod +x /entrypoint.sh
 
 USER ${USERNAME}

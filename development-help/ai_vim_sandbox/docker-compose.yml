@@ -33,7 +33,6 @@ services:
       - ./persist/home:/home/${USERNAME}
       - ./persist/workspace:/workspace
       - ./persist/vim:/home/${USERNAME}/.vim
-      - ./persist/vimrc:/home/${USERNAME}/.vimrc
     working_dir: /workspace
 
   agent:
