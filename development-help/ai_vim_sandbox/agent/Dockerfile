@@ -1,7 +1,7 @@
 FROM python:3.12-slim
 
-ARG UID=1000
-ARG GID=1000
+ARG C_UID=1000
+ARG C_GID=1000
 ARG USERNAME=dev
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -15,8 +15,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ripgrep \
   && rm -rf /var/lib/apt/lists/*
 
-RUN groupadd -g ${GID} ${USERNAME} \
-  && useradd -m -u ${UID} -g ${GID} -s /bin/bash ${USERNAME}
+RUN groupadd -g ${C_GID} ${USERNAME} \
+  && useradd -m -u ${C_UID} -g ${C_GID} -s /bin/bash ${USERNAME}
 
 WORKDIR /opt/agent
 COPY requirements.txt /opt/agent/requirements.txt

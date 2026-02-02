@@ -16,8 +16,8 @@ services:
     build:
       context: ./vim-sandbox
       args:
-        UID: ${UID}
-        GID: ${GID}
+        C_UID: ${C_UID}
+        C_GID: ${C_GID}
         USERNAME: ${USERNAME}
     container_name: vim-sandbox
     depends_on:
@@ -39,8 +39,8 @@ services:
     build:
       context: ./agent
       args:
-        UID: ${UID}
-        GID: ${GID}
+        C_UID: ${C_UID}
+        C_GID: ${C_GID}
         USERNAME: ${USERNAME}
     container_name: ai-agent
     depends_on:

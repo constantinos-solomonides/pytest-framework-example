@@ -1,7 +1,7 @@
 FROM debian:bookworm-slim
 
-ARG UID=1000
-ARG GID=1000
+ARG C_UID=1000
+ARG C_GID=1000
 ARG USERNAME=dev
 
 ENV DEBIAN_FRONTEND=noninteractive
@@ -22,12 +22,15 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   && rm -rf /var/lib/apt/lists/*
 
 # Create a user matching host UID/GID
-RUN groupadd -g ${GID} ${USERNAME} \
-  && useradd -m -u ${UID} -g ${GID} -s /bin/bash ${USERNAME}
+RUN groupadd -g ${C_GID} ${USERNAME} \
+  && useradd -m -u ${C_UID} -g ${C_GID} -s /bin/bash ${USERNAME}
 
 # Install vim-plug (plugin manager)
-RUN curl -fsSL https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim \
-  -o /usr/share/vim/vimfiles/autoload/plug.vim
+RUN mkdir -p /home/${USERNAME}/.vim/autoload \
+ && curl -fsSL https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim \
+     -o /home/${USERNAME}/.vim/autoload/plug.vim \
+      && chown -R ${USERNAME}:${C_GID} /home/${USERNAME}/.vim
+
 
 COPY vimrc /etc/vim/vimrc.local
 COPY entrypoint.sh /entrypoint.sh
