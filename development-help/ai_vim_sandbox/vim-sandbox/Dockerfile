@@ -21,6 +21,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     tzdata \
   && rm -rf /var/lib/apt/lists/*
 
+# Copy seed script + entrypoint
+COPY seed_vim.sh /usr/local/bin/seed_vim.sh
+RUN chmod +x /usr/local/bin/seed_vim.sh
+
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
 # Create a user matching host UID/GID
 RUN groupadd -g ${C_GID} ${USERNAME} \
   && useradd -m -u ${C_UID} -g ${C_GID} -s /bin/bash ${USERNAME}
@@ -38,9 +45,6 @@ RUN chmod +x /entrypoint.sh
 
 USER ${USERNAME}
 WORKDIR /workspace
-
-# Pre-install plugins (best-effort). This will run once at build time.
-RUN vim +'silent! PlugInstall --sync' +qa || true
 
 ENTRYPOINT ["/entrypoint.sh"]
 CMD ["vim"]
