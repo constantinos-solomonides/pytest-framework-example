@@ -55,6 +55,11 @@ if !exists("mapleader")
 endif
 
 " vim-plug bootstrap (expects ~/.vim/autoload/plug.vim)
+" Add this part to ensure that plug is loaded prior to checking with `exists`
+try
+    call plug#nosuchfunction()
+catch /.*/
+endtry
 if exists('*plug#begin')
   " If you already have a plugin section elsewhere, you may remove the plugins below
   " and keep only the PlugInstall step in this script.
@@ -68,6 +73,10 @@ if exists('*plug#begin')
   Plug 'junegunn/fzf.vim'
 
   call plug#end()
+endif
+if !isdirectory($HOME . "/.vim/plugged")
+  echo "Directory does not exist, installing plugins for the first (and only) time"
+  PlugInstall
 endif
 " <<< ai-sandbox seed END
 EOF

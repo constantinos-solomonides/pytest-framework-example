@@ -10,7 +10,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates \
     curl \
     git \
-    vim \
+    vim-nox \
     python3 \
     python3-httpx \
     python3-jinja2 \
@@ -39,7 +39,6 @@ RUN mkdir -p /home/${USERNAME}/.vim/autoload \
       && chown -R ${USERNAME}:${C_GID} /home/${USERNAME}/.vim
 
 
-COPY vimrc /etc/vim/vimrc.local
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
