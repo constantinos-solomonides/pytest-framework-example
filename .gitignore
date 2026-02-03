@@ -1,3 +1,6 @@
 .*.swp
 development-help/ai_vim_sandbox/persist/*
+!development-help/ai_vim_sandbox/persist/codex-home/
+development-help/ai_vim_sandbox/persist/codex-home/*
+!development-help/ai_vim_sandbox/persist/codex-home/*.md
 development-help/ai_vim_sandbox/.env
