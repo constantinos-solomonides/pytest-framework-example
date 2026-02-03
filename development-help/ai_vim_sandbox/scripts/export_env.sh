@@ -14,6 +14,9 @@ USERNAME="${USERNAME:-dev}"
 C_UID="$(id -u)"
 C_GID="$(id -g)"
 
+OPENAI_API_KEY=MY_OPENAI_KEY
+OPENAI_MODEL=gpt-5.2-codex
+
 cat > .env <<EOF
 USERNAME=${USERNAME}
 C_UID=${C_UID}
