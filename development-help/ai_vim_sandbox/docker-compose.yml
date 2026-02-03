@@ -1,4 +1,23 @@
 services:
+  codex:
+    build:
+      context: .
+      dockerfile: containers/codex/Dockerfile
+      args:
+        UID: ${LOCAL_UID}
+        GID: ${LOCAL_GID}
+        USERNAME: ${LOCAL_USER:-dev}
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      # optional default model for your wrapper scripts (Codex itself may manage models internally)
+      - OPENAI_MODEL=${OPENAI_MODEL:-gpt-5.2-codex}
+    working_dir: /workspace
+    volumes:
+      # project workspace (bind mount)
+      - ./workspace:/workspace
+      # persistent Codex state/config (bind mount directory, not a Docker volume)
+      - ./persist/codex-home:/home/${LOCAL_USER:-dev}
+    restart: unless-stopped
   ollama:
     image: ollama/ollama:latest
     container_name: ollama
