@@ -1,13 +1,15 @@
 # To implement the `anonymize` git filter via `git config` do the following
+# NOTE: Remove the period `.` before the last two characters. It is required so the replacement doesn't happen below as
+# well
 # git config --global filter.anonymize.clean \
-#   'sed    -e "s/<TELEPHONE_RE_PATTERN>/MY_PHONE_NUMBER/g" \
-#           -e "s/<EMAIL_RE_PATTERN>/MY_EMAIL_ADDRESS/g" \
-#           -e "s/MY_OPENAI_KEY \
+#   'sed    -e "s/<TELEPHONE_RE_PATTERN>/MY_PHONE_NUMB.ER/g" \
+#           -e "s/<EMAIL_RE_PATTERN>/MY_EMAIL_ADDRE.SS/g" \
+#           -e "s/<OPENAI_RE_PATTERN>/MY_OPENAI_K.EY/ \
 #           -e 's/\s\+$//'' # The last entry removes EOL whitespace
 # git config --global filter.anonymize.smudge \
-#    'sed   -e "s/MY_PHONE_NUMBER/<ACTUAL_PHONE_NUMBER>/g" \
-#           -e "s/MY_EMAIL_ADDRESS/<ACTUAL_EMAIL>/g" 
-#           -e "s/MY_OPENAI_KEY/<ACTUAL_OPENAI_KEY>/"'
+#    'sed   -e "s/MY_PHONE_NUMB.ER/<ACTUAL_PHONE_NUMBER>/g" \
+#           -e "s/MY_EMAIL_ADDRE.SS/<ACTUAL_EMAIL>/g" \
+#           -e "s/MY_OPENAI_K.EY/<ACTUAL_OPENAI_KEY>/"'
 # NOTE: The last substitution **is not safe**. It's best to use an actual vault or manually replace each time
 *.md        filter=anonymize
 *.sh        filter=anonymize
