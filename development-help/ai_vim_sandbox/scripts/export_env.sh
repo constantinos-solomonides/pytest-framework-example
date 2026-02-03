@@ -21,6 +21,15 @@ cat > .env <<EOF
 USERNAME=${USERNAME}
 C_UID=${C_UID}
 C_GID=${C_GID}
+OPENAI_API_KEY=${OPENAI_API_KEY}
+OPENAI_MODEL=${OPENAI_MODEL}
 EOF
 
-echo "Wrote .env with USERNAME=${USERNAME} C_UID=${C_UID} C_GID=${C_GID}"
+cat <<EOF
+Wrote .env with
+    USERNAME=${USERNAME}
+    C_UID=${C_UID}
+    C_GID=${C_GID}
+    OPENAI_MODEL=${OPENAI_MODEL}
+    and setting OPENAI_API_KEY
+EOF

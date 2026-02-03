@@ -4,9 +4,9 @@ services:
       context: .
       dockerfile: codex/Dockerfile
       args:
-        C_UID: ${LOCAL_UID}
-        C_GID: ${LOCAL_GID}
-        USERNAME: ${LOCAL_USER:-dev}
+        C_UID: ${C_UID}
+        C_GID: ${C_GID}
+        USERNAME: ${USERNAME:-dev}
     environment:
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       # optional default model for your wrapper scripts (Codex itself may manage models internally)
@@ -16,7 +16,7 @@ services:
       # project workspace (bind mount)
       - ./workspace:/workspace
       # persistent Codex state/config (bind mount directory, not a Docker volume)
-      - ./persist/codex-home:/home/${LOCAL_USER:-dev}
+      - ./persist/codex-home:/home/${USERNAME:-dev}
     restart: unless-stopped
   ollama:
     image: ollama/ollama:latest
