@@ -1,0 +1,57 @@
+services:
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama
+    restart: unless-stopped
+    environment:
+      # Optional: keep this default unless you know you need it
+      - OLLAMA_HOST=0.0.0.0:11434
+    ports:
+      - "11434:11434"
+    # Persist models using a directory bind-mount (NOT a Docker volume)
+    volumes:
+      - ./persist/ollama:/root/.ollama
+
+  vim:
+    build:
+      context: ./vim-sandbox
+      args:
+        C_UID: ${C_UID}
+        C_GID: ${C_GID}
+        USERNAME: ${USERNAME}
+    container_name: vim-sandbox
+    depends_on:
+      - ollama
+    tty: true
+    stdin_open: true
+    environment:
+      - USERNAME=${USERNAME}
+      - OLLAMA_BASE_URL=http://ollama:11434
+      - WORKDIR=/workspace
+    # Only mount explicitly allowed directories; no full-host filesystem exposure
+    volumes:
+      - ./persist/home:/home/${USERNAME}
+      - ./persist/workspace:/workspace
+      - ./persist/vim:/home/${USERNAME}/.vim
+    working_dir: /workspace
+
+  agent:
+    build:
+      context: ./agent
+      args:
+        C_UID: ${C_UID}
+        C_GID: ${C_GID}
+        USERNAME: ${USERNAME}
+    container_name: ai-agent
+    depends_on:
+      - ollama
+    tty: true
+    stdin_open: true
+    environment:
+      - USERNAME=${USERNAME}
+      - OLLAMA_BASE_URL=http://ollama:11434
+      - WORKDIR=/workspace
+    volumes:
+      - ./persist/home:/home/${USERNAME}
+      - ./persist/workspace:/workspace
+    working_dir: /workspace
