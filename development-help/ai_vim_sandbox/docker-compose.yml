@@ -2,10 +2,10 @@ services:
   codex:
     build:
       context: .
-      dockerfile: containers/codex/Dockerfile
+      dockerfile: codex/Dockerfile
       args:
-        UID: ${LOCAL_UID}
-        GID: ${LOCAL_GID}
+        C_UID: ${LOCAL_UID}
+        C_GID: ${LOCAL_GID}
         USERNAME: ${LOCAL_USER:-dev}
     environment:
       - OPENAI_API_KEY=${OPENAI_API_KEY}
