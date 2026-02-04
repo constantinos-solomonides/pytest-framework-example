@@ -24,7 +24,7 @@ services:
       - ollama
 
   openhands:
-    image: docker.all-hands.dev/all-hands-ai/openhands:0.28
+    image: ghcr.io/all-hands-ai/openhands:0.28
     container_name: openhands
     networks: [sandbox]
     depends_on:
@@ -42,7 +42,7 @@ services:
 
       # Bind mount path used by OpenHands (matches your sandboxed workspace)
       - WORKSPACE_MOUNT_PATH=/opt/workspace_base
-      - SANDBOX_USER_ID=${UID}
+      - SANDBOX_USER_ID=${C_UID}
     volumes:
       # Persist OpenHands state under persist/
       - ./persist/openhands-state:/.openhands-state
@@ -51,7 +51,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
 
       # Only mount your controlled workspace (no full host FS)
-      - ./workspace:/opt/workspace_base
+      - ./persist/workspace:/opt/workspace_base
 
     extra_hosts:
       - "host.docker.internal:host-gateway"
