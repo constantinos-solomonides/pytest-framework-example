@@ -8,20 +8,22 @@ services:
     ports:
       - "11434:11434" # optional; remove if you only want internal access
 
+
+
   litellm:
-    image: ghcr.io/berriai/litellm:latest
-    container_name: litellm
-    networks: [sandbox]
+    image: ghcr.io/berriai/litellm:main-stable
+    platform: linux/amd64
+    entrypoint: ["litellm"]
     command: ["--config", "/config/config.yaml", "--port", "4000"]
     environment:
-      # LiteLLM reads OPENAI_API_KEY for OpenAI backends
       - OPENAI_API_KEY=${OPENAI_API_KEY}
     volumes:
       - ./persist/litellm:/config
+    networks: [sandbox]
     ports:
-      - "4000:4000" # optional; useful for debugging locally
+      - "4000:4000"
     depends_on:
-      - ollama
+        - ollama
 
   openhands:
     image: ghcr.io/all-hands-ai/openhands:0.28
