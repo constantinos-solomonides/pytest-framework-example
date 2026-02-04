@@ -2,15 +2,61 @@ services:
   ollama:
     image: ollama/ollama:latest
     container_name: ollama
-    restart: unless-stopped
-    environment:
-      # Optional: keep this default unless you know you need it
-      - OLLAMA_HOST=0.0.0.0:11434
-    ports:
-      - "11434:11434"
-    # Persist models using a directory bind-mount (NOT a Docker volume)
+    networks: [sandbox]
     volumes:
       - ./persist/ollama:/root/.ollama
+    ports:
+      - "11434:11434" # optional; remove if you only want internal access
+
+  litellm:
+    image: ghcr.io/berriai/litellm:latest
+    container_name: litellm
+    networks: [sandbox]
+    command: ["--config", "/config/config.yaml", "--port", "4000"]
+    environment:
+      # LiteLLM reads OPENAI_API_KEY for OpenAI backends
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+    volumes:
+      - ./persist/litellm:/config
+    ports:
+      - "4000:4000" # optional; useful for debugging locally
+    depends_on:
+      - ollama
+
+  openhands:
+    image: docker.all-hands.dev/all-hands-ai/openhands:0.28
+    container_name: openhands
+    networks: [sandbox]
+    depends_on:
+      - litellm
+    ports:
+      - "3000:3000"
+    environment:
+      # OpenHands is typically configured via env vars for runtime + LLM endpoint
+      - SANDBOX_RUNTIME_CONTAINER_IMAGE=docker.all-hands.dev/all-hands-ai/runtime:0.28-nikolaik
+      - LOG_ALL_EVENTS=true
+
+      # Point OpenHands at LiteLLM (OpenAI-compatible /v1 endpoint)
+      - LLM_API_KEY=litellm
+      - LLM_BASE_URL=http://litellm:4000/v1
+
+      # Bind mount path used by OpenHands (matches your sandboxed workspace)
+      - WORKSPACE_MOUNT_PATH=/opt/workspace_base
+      - SANDBOX_USER_ID=${UID}
+    volumes:
+      # Persist OpenHands state under persist/
+      - ./persist/openhands-state:/.openhands-state
+
+      # OpenHands uses Docker as its sandbox runtime (needs the socket)
+      - /var/run/docker.sock:/var/run/docker.sock
+
+      # Only mount your controlled workspace (no full host FS)
+      - ./workspace:/opt/workspace_base
+
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    stdin_open: true
+    tty: true
 
   vim:
     build:
@@ -55,3 +101,7 @@ services:
       - ./persist/home:/home/${USERNAME}
       - ./persist/workspace:/workspace
     working_dir: /workspace
+
+networks:
+  sandbox:
+    driver: bridge
