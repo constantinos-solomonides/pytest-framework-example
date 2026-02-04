@@ -1,1 +1,13 @@
--
+## Version v0.1.0
+- Create the skeletopn of a framework that allows execution of pytest code
+- The suites are found under `testsuite` and contains
+    - `product_a`
+    - `product_b`
+- Each product has its own conftest.py
+- There is a python module that can be imported that contains helpers
+- There is another python module that integrates with testrail
+- The execution is launched from a docker container
+- The image for the container is built via the following combination
+    - docker-wompose.yml file used to build more easily
+    - Dockerfile with all requirements installed
+    - requirements.txt file for `pip install`
