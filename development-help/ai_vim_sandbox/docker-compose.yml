@@ -8,8 +8,6 @@ services:
     ports:
       - "11434:11434" # optional; remove if you only want internal access
 
-
-
   litellm:
     image: ghcr.io/berriai/litellm:main-stable
     platform: linux/amd64
@@ -35,11 +33,12 @@ services:
       - "3000:3000"
     environment:
       # OpenHands is typically configured via env vars for runtime + LLM endpoint
-      - SANDBOX_RUNTIME_CONTAINER_IMAGE=docker.all-hands.dev/all-hands-ai/runtime:0.28-nikolaik
+      - SANDBOX_RUNTIME_CONTAINER_IMAGE=ghcr.io/all-hands-ai/runtime:0.28-nikolaik
       - LOG_ALL_EVENTS=true
 
       # Point OpenHands at LiteLLM (OpenAI-compatible /v1 endpoint)
       - LLM_API_KEY=litellm
+      - LLM_MODEL=litellm_proxy/qwen2_5-coder-7b
       - LLM_BASE_URL=http://litellm:4000/v1
 
       # Bind mount path used by OpenHands (matches your sandboxed workspace)
@@ -59,6 +58,30 @@ services:
       - "host.docker.internal:host-gateway"
     stdin_open: true
     tty: true
+
+  openhands-cli:
+    build:
+      context: ./openhands-cli
+      dockerfile: Dockerfile
+    container_name: openhands-cli
+    working_dir: /workspace
+    networks: [sandbox]
+    depends_on:
+      - litellm
+    environment:
+      - HOME=/persist/openhands-cli
+
+      # LiteLLM OpenAI-compatible endpoint (internal Docker network)
+      - OPENAI_API_BASE=http://litellm:4000/v1
+      - OPENAI_API_KEY=litellm
+
+      # Pick a model id that LiteLLM exposes (recommended: openai/… alias)
+      - OPENAI_MODEL=litellm_proxy/qwen2_5-coder-7b
+    volumes:
+      - ./persist/workspace:/workspace
+      - ./persist/openhands-cli:/persist/openhands-cli
+    tty: true
+    stdin_open: true
 
   vim:
     build:
@@ -81,27 +104,6 @@ services:
       - ./persist/home:/home/${USERNAME}
       - ./persist/workspace:/workspace
       - ./persist/vim:/home/${USERNAME}/.vim
-    working_dir: /workspace
-
-  agent:
-    build:
-      context: ./agent
-      args:
-        C_UID: ${C_UID}
-        C_GID: ${C_GID}
-        USERNAME: ${USERNAME}
-    container_name: ai-agent
-    depends_on:
-      - ollama
-    tty: true
-    stdin_open: true
-    environment:
-      - USERNAME=${USERNAME}
-      - OLLAMA_BASE_URL=http://ollama:11434
-      - WORKDIR=/workspace
-    volumes:
-      - ./persist/home:/home/${USERNAME}
-      - ./persist/workspace:/workspace
     working_dir: /workspace
 
 networks:
