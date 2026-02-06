@@ -5,6 +5,11 @@ model_list:
       model: ollama/llama3
       api_base: http://ollama:11434
 
+  - model_name: qwen2_5-coder-7b
+    litellm_params:
+      model: ollama/qwen2.5-coder:7b
+      api_base: http://ollama:11434
+
   # Remote: OpenAI
   - model_name: openai/gpt-4o-mini
     litellm_params:
