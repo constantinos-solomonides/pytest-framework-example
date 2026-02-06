@@ -1,8 +1,8 @@
 model_list:
   # Local / free: Ollama
-  - model_name: local/llama3
+  - model_name: llama3
     litellm_params:
-      model: ollama_chat/llama3
+      model: ollama/llama3
       api_base: http://ollama:11434
 
   # Remote: OpenAI
@@ -13,5 +13,5 @@ model_list:
   # Optional: a “default” alias you can select in UIs that don’t like slashes
   - model_name: default
     litellm_params:
-      model: ollama_chat/llama3
+      model: openai/local-llama3
       api_base: http://ollama:11434
